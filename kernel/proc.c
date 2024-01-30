@@ -690,6 +690,7 @@ void print_hello(int n)
   printf("Hello from the kernel space %d\n", n);
 }
 
+//CS202 Lab1 ===========================================
 int get_sys_info(int n)
 {
   if(n == 0){
@@ -697,16 +698,13 @@ int get_sys_info(int n)
     int count = 0;
 
     for (p = proc; p < &proc[NPROC]; p++) {
-      acquire(&p->lock);
       if (p->state != UNUSED) {
         count++;
       }
-      release(&p->lock);
     }
     return count;
   }
   else if(n == 1){
-    sys_call_counter = sys_call_counter - 1;
     return sys_call_counter;
   }
   else if(n == 2){
@@ -727,10 +725,8 @@ struct pinfo {
 
 int get_proc_info(struct pinfo *info)
 {
-    // Allocate a temporary structure to hold the process information
     struct pinfo temp;
 
-    // Fill out the fields of the temporary structure
     if(myproc()->parent){  
       temp.ppid = myproc()->parent->pid;
     }
@@ -738,12 +734,12 @@ int get_proc_info(struct pinfo *info)
       temp.ppid = -1;
     }
     temp.syscall_count = myproc()->proc_sys_call_counter;
-    temp.page_usage = myproc()->sz / PGSIZE;
+    temp.page_usage = PGROUNDUP(myproc()->sz) / PGSIZE;
 
-    // Use copyout to copy the data to user-space memory
     if (copyout(myproc()->pagetable, (uint64)info, (char *)&temp, sizeof(temp)) < 0) {
         return -1;
     }
 
-    return 0;  // Success
+    return 0; 
 }
+//======================================================================================

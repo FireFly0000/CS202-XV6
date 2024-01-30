@@ -86,15 +86,12 @@ free_pages_counter(void)
 {
     int count = 0;
 
-    acquire(&kmem.lock);
     struct run *current = kmem.freelist;
 
     while (current) {
         count++;
         current = current->next;
     }
-
-    release(&kmem.lock);
 
     return count;
 }
