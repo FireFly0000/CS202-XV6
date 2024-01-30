@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "defs.h"
 
+
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
@@ -146,6 +147,7 @@ found:
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
 
+  p->proc_sys_call_counter = 0; //part 2 lab1
   return p;
 }
 
@@ -704,6 +706,7 @@ int get_sys_info(int n)
     return count;
   }
   else if(n == 1){
+    sys_call_counter = sys_call_counter - 1;
     return sys_call_counter;
   }
   else if(n == 2){
@@ -714,4 +717,33 @@ int get_sys_info(int n)
   else{
     return -1;
   }
+}
+
+struct pinfo {
+    int ppid;
+    int syscall_count;
+    int page_usage;
+};
+
+int get_proc_info(struct pinfo *info)
+{
+    // Allocate a temporary structure to hold the process information
+    struct pinfo temp;
+
+    // Fill out the fields of the temporary structure
+    if(myproc()->parent){  
+      temp.ppid = myproc()->parent->pid;
+    }
+    else{
+      temp.ppid = -1;
+    }
+    temp.syscall_count = myproc()->proc_sys_call_counter;
+    temp.page_usage = myproc()->sz / PGSIZE;
+
+    // Use copyout to copy the data to user-space memory
+    if (copyout(myproc()->pagetable, (uint64)info, (char *)&temp, sizeof(temp)) < 0) {
+        return -1;
+    }
+
+    return 0;  // Success
 }

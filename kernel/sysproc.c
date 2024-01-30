@@ -98,10 +98,20 @@ uint64 sys_hello(void) // hello syscall definition
   return 0;
 }
 
-uint64 sys_info(void) // hello syscall definition
+//lab 1
+uint64 sys_info(void) 
 {
   int n;
   argint(0, &n);
   int res = get_sys_info(n);
+  return res;
+}
+
+uint64 sys_procinfo(void){
+  struct pinfo *info;
+
+  argaddr(0, (void*)&info);
+
+  int res = get_proc_info(info);
   return res;
 }

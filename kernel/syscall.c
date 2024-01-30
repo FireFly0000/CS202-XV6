@@ -103,6 +103,7 @@ extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
 extern uint64 sys_hello(void); //hello: declaration
 extern uint64 sys_info(void);
+extern uint64 sys_procinfo(void);
 
 //Lab1, extern int sys_call_counter
 int sys_call_counter = 0;
@@ -133,6 +134,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_hello]   sys_hello,  //hello: syscall entry
 [SYS_info]    sys_info,
+[SYS_procinfo] sys_procinfo,
 };
 
 void
@@ -147,6 +149,7 @@ syscall(void)
     // and store its return value in p->trapframe->a0
     p->trapframe->a0 = syscalls[num]();
     sys_call_counter++;
+    p->proc_sys_call_counter++;
   } else {
     printf("%d %s: unknown sys call %d\n",
             p->pid, p->name, num);

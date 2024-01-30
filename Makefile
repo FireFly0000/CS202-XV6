@@ -134,6 +134,7 @@ UPROGS=\
 	$U/_zombie\
 	$U/_test\
 	$U/_test_sys_info\
+	$U/_test_procinfo\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

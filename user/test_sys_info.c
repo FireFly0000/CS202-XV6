@@ -38,9 +38,9 @@ int main(int argc, char *argv[])
 #include "user/user.h"
 #define MAX_PROC 10
 struct pinfo {
-int ppid;
-int syscall_count;
-int page_usage;
+    int ppid;
+    int syscall_count;
+    int page_usage;
 };
 void print_sysinfo(void)
 {
@@ -55,14 +55,14 @@ void print_sysinfo(void)
 
 int main(int argc, char *argv[])
 {
-    //int mem, n_proc, ret, proc_pid[MAX_PROC];
-    int n_proc, ret, proc_pid[MAX_PROC];
-    /*if (argc < 3) {
+    int mem, n_proc, ret, proc_pid[MAX_PROC];
+    //int n_proc, ret, proc_pid[MAX_PROC];
+    if (argc < 3) {
         printf("Usage: %s [MEM] [N_PROC]\n", argv[0]);
         exit(-1);
-    }*/
-    //mem = atoi(argv[1]);
-    n_proc = atoi(argv[1]);
+    }
+    mem = atoi(argv[1]);
+    n_proc = atoi(argv[2]);
     if (n_proc > MAX_PROC) {
         printf("Cannot test with more than %d processes\n", MAX_PROC);
         exit(-1);
@@ -72,14 +72,14 @@ int main(int argc, char *argv[])
         sleep(1);
         ret = fork();
         if (ret == 0) { // child process
-            /*struct pinfo param;
+            struct pinfo param;
             malloc(mem); // this triggers a syscall
             for (int j = 0; j < 10; j++)
                 procinfo(&param); // calls 10 times
             printf("[procinfo %d] ppid: %d, syscalls: %d, page usage: %d\n",
             getpid(), param.ppid, param.syscall_count, param.page_usage);
-            while (1);*/
-            printf("Child Process %d\n", i);
+            while (1);
+            //printf("Child Process %d\n", i);
             exit(0);
         }
         else { // parent
