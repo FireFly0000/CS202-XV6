@@ -104,6 +104,9 @@ extern uint64 sys_close(void);
 extern uint64 sys_hello(void); //hello: declaration
 extern uint64 sys_info(void);
 extern uint64 sys_procinfo(void);
+//Lab 2 
+extern uint64 sys_sched_statistics(void);
+extern uint64 sys_sched_tickets(void);
 
 //Lab1, extern int sys_call_counter
 int sys_call_counter = 0;
@@ -135,6 +138,8 @@ static uint64 (*syscalls[])(void) = {
 [SYS_hello]   sys_hello,  //hello: syscall entry
 [SYS_info]    sys_info,
 [SYS_procinfo] sys_procinfo,
+[SYS_sched_statistics] sys_sched_statistics, //Lab 2
+[SYS_sched_tickets] sys_sched_tickets,
 };
 
 void

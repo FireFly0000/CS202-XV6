@@ -1,4 +1,4 @@
-/*#include "kernel/types.h"
+#include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
 
@@ -7,33 +7,21 @@ int main(int argc, char *argv[])
     int n = 0;
     if(argc >= 2) n = atoi(argv[1]);
 
-    int active_proc = info(0);
-    int syscall_count = info(1);
-    printf("[Before forking %d children]: Active Proc: %d, Syscalls: %d\n", n, active_proc, syscall_count);
-    int free_pages = info(2);
-    printf("Free pages: %d\n", free_pages);
-
     for (int i = 0; i < n; i++)
     {
         sleep(1);
         int c = fork();
         if(c == 0){
-            //printf("Number of children: %d\n", i);
+            //sched_statistics();
+            while(1);
             exit(0);
         }
     }
-
-    active_proc = info(0);
-    syscall_count = info(1);
-    printf("[After forking %d children]: Active Proc: %d, Syscalls: %d\n", n, active_proc, syscall_count);
-
-    free_pages = info(2);
-    printf("Free pages: %d\n", free_pages);
-
+    //sched_statistics();
     exit(0);
-}*/
+}
 
-#include "kernel/types.h"
+/*#include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
 #define MAX_PROC 10
@@ -91,4 +79,4 @@ int main(int argc, char *argv[])
     print_sysinfo();
     for (int i = 0; i < n_proc; i++) kill(proc_pid[i]);
     exit(0);
-}
+}*/

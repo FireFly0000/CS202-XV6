@@ -63,7 +63,7 @@ void            ramdiskrw(struct buf*);
 void*           kalloc(void);
 void            kfree(void *);
 void            kinit(void);
-int             free_pages_counter(void);
+int             free_pages_counter(void);   //lab 1, function to count the number of free pages
 
 
 // log.c
@@ -111,7 +111,9 @@ void            procdump(void);
 void            print_hello(int); //hello
 int             get_sys_info(int);
 struct pinfo;
-int             get_proc_info(struct pinfo*);            
+int             get_proc_info(struct pinfo*);
+int             get_sched_statistics(int);
+int             set_sched_tickets(int);            
 
 // swtch.S
 void            swtch(struct context*, struct context*);

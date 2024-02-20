@@ -148,6 +148,11 @@ found:
   p->context.sp = p->kstack + PGSIZE;
 
   p->proc_sys_call_counter = 0; //part 2 lab1
+
+  p->ticks = 0; //Lab 2
+  p->tickets = 10000; // Lab 2 default ticks and tickets value
+  p->stride = 10000 / p->tickets; // Lab 2 initialize stride to K/#tickets, K = 10000
+  p->pass = p->stride; // Lab 2 initial pass = #stride
   return p;
 }
 
@@ -436,6 +441,28 @@ wait(uint64 addr)
   }
 }
 
+//Lab 2 helper functions (random number and total tickets) ==========================
+// pseudo random generator (https://stackoverflow.com/a/7603688)
+unsigned short lfsr = 0xACE1u;
+unsigned short bit;
+unsigned short rand()
+{
+  bit = ((lfsr >> 0) ^ (lfsr >> 2) ^ (lfsr >> 3) ^ (lfsr >> 5)) & 1;
+  return lfsr = (lfsr >> 1) | (bit << 15);
+}
+
+int total_tickets(void) {
+	struct proc *p;
+	int total = 0;
+	for (p = proc; p < &proc[NPROC]; p++) {
+		if (p->state == RUNNABLE) {
+			total += p->tickets;
+		}
+	}
+	return total;
+}
+//===================================================
+
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
 // Scheduler never returns.  It loops, doing:
@@ -450,17 +477,66 @@ scheduler(void)
   struct cpu *c = mycpu();
   
   c->proc = 0;
+
+  //Lab 2 define winning ticket and sum to calculate 
+  //what process reaches the winning ticket
   for(;;){
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
 
+    //Lab 2 lottery Scheduler
+    #if defined(LOTTERY)
+    //Generate a number between 0 and total tickets
+    uint64 winning_ticket = 0;
+    uint64 sum = 0; 
+    winning_ticket = rand() % total_tickets(); 
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
-      if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
+      //printf("TOTAL: %d, WINNING; %d, SUM: %d, PT: %d\n", total_tickets(), winning_ticket, sum, p->tickets);
+      if(p->state != RUNNABLE){
+        release(&p->lock);
+        continue;
+      }
+      //Check to see if winning ticket is reached in the list
+      if((sum + p->tickets) < winning_ticket)
+      {
+        sum = sum + p->tickets;
+        release(&p->lock);
+        continue;
+      }
+      p->state = RUNNING;
+      p->ticks++;
+      c->proc = p;
+      swtch(&c->context, &p->context);
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+      release(&p->lock);
+      break;
+    }
+
+    //Lab 2 Stride scheduler
+    #elif defined(STRIDE)
+    uint64 minPass = 0;
+    //struct proc *minProc = 0;
+    
+    //Get the initial process that has the minimum pass
+    for(p = proc; p < &proc[NPROC]; p++) {
+      if(p->state != RUNNABLE){
+        continue;
+      }
+      if(minPass < 1 || p->pass < minPass){
+        //minProc = p;
+        minPass = p->pass;
+      }     
+    }
+     for(p = proc; p < &proc[NPROC]; p++) {
+      acquire(&p->lock);
+      if(p->state == RUNNABLE && p->pass <= minPass) {
         p->state = RUNNING;
+        p->ticks++;
+        p->pass = p->pass + p->stride;
         c->proc = p;
         swtch(&c->context, &p->context);
 
@@ -470,6 +546,28 @@ scheduler(void)
       }
       release(&p->lock);
     }
+
+
+    #else
+    for(p = proc; p < &proc[NPROC]; p++) {
+      acquire(&p->lock);
+      if(p->state == RUNNABLE) {
+        // Switch to chosen process.  It is the process's job
+        // to release its lock and then reacquire it
+        // before jumping back to us.
+        p->state = RUNNING;
+        p->ticks++;
+        c->proc = p;
+        swtch(&c->context, &p->context);
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+      }
+      release(&p->lock);
+    }
+
+    #endif
   }
 }
 
@@ -743,3 +841,31 @@ int get_proc_info(struct pinfo *info)
     return 0; 
 }
 //======================================================================================
+
+//Lab2
+int get_sched_statistics(int pid)
+{
+  struct proc *p;
+  
+  for (p = proc; p < &proc[NPROC]; p++) {
+    if (p->pid == pid) {
+      break;
+    }
+  }
+  printf("%d(%s): tickets: %d, ticks: %d\n", p->pid, p->name, p->tickets, p->ticks);
+  return 0;
+}
+
+int set_sched_tickets(int n)
+{
+  if(n > 10000){
+    printf("Tickets cannot be more than 10000\n");
+    return 0;
+  }
+  else{
+    myproc()->tickets = n;
+    myproc()->stride = 10000 / myproc()->tickets; // update stride to K/#tickets, K = 10000
+    //myproc()->pass = myproc()->stride; // update initial pass = #stride
+  }
+  return 0;
+}

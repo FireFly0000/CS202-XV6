@@ -40,3 +40,5 @@ entry("uptime");
 entry("hello");
 entry("info");
 entry("procinfo");
+entry("sched_statistics");
+entry("sched_tickets");

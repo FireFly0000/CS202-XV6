@@ -106,4 +106,10 @@ struct proc {
   char name[16];               // Process name (debugging)
   
   uint64 proc_sys_call_counter; //part 2 lab1
+
+  uint64 tickets;         //Lab 2 lottery scheduling
+  uint64 ticks;
+
+  uint64 stride;        //lab 2 stride scheduling
+  uint64 pass;
 };

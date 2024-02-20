@@ -115,3 +115,18 @@ uint64 sys_procinfo(void){
   int res = get_proc_info(info);
   return res;
 }
+
+//Lab 2
+uint64 sys_sched_statistics(void)
+{
+  int n;
+  argint(0, &n);
+  return get_sched_statistics(n);
+}
+
+uint64 sys_sched_tickets(void){
+  int n;
+  argint(0, &n);
+  int res = set_sched_tickets(n);
+  return res;
+}
