@@ -22,9 +22,11 @@ int main(int argc, char *argv[])
         if (ret == 0) { // child process
             sched_tickets(n_tickets);
             while(1);
-            exit(0);
+            //sched_statistics();
+            //exit(0);
         }
         else { // parent
+            //sleep(sleep_ticks);
             proc_pid[i] = ret;
             continue;
         }

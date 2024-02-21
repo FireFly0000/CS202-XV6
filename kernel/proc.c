@@ -513,7 +513,7 @@ scheduler(void)
       // It should have changed its p->state before coming back.
       c->proc = 0;
       release(&p->lock);
-      break;
+      //break;
     }
 
     //Lab 2 Stride scheduler

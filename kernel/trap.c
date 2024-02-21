@@ -165,6 +165,8 @@ clockintr()
 {
   acquire(&tickslock);
   ticks++;
+  //struct proc *p = myproc();
+  //p->ticks = ticks;
   wakeup(&ticks);
   release(&tickslock);
 }
