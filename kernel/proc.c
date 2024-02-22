@@ -492,28 +492,29 @@ scheduler(void)
     winning_ticket = rand() % total_tickets(); 
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
-      //printf("TOTAL: %d, WINNING; %d, SUM: %d, PT: %d\n", total_tickets(), winning_ticket, sum, p->tickets);
       if(p->state != RUNNABLE){
         release(&p->lock);
         continue;
       }
       //Check to see if winning ticket is reached in the list
-      if((sum + p->tickets) < winning_ticket)
+      if((sum + p->tickets) > winning_ticket)
       {
+        p->state = RUNNING;
+        p->ticks++;
+        c->proc = p;
+        swtch(&c->context, &p->context);
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+        release(&p->lock);
+        break;
+      }
+      else{
+        //printf("TOTAL: %d, WINNING; %d, SUM: %d, PT: %d\n", total_tickets(), winning_ticket, sum, p->tickets);
         sum = sum + p->tickets;
         release(&p->lock);
-        continue;
       }
-      p->state = RUNNING;
-      p->ticks++;
-      c->proc = p;
-      swtch(&c->context, &p->context);
-
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
-      release(&p->lock);
-      break;
     }
 
     //Lab 2 Stride scheduler
